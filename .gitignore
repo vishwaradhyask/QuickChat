@@ -1,2 +1,4 @@
 evn/*
 ui/node_modules/*
+backend/static/*
+backend/templates/*

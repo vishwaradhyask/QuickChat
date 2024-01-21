@@ -20,7 +20,7 @@ export const counterSlice = createSlice({
       state.snackBarData = actions.payload
     },
     setLoginCredentials: (state, actions) => {
-      state.snackBarData = actions.payload
+      state.loginCredentials = actions.payload
     },
 
   },
