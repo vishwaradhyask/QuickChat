@@ -12,6 +12,7 @@ import { cmpType } from './constants'
 import SignUp from './components/login/Signup';
 import { snackBarAction } from './reducers/loginReducer';
 import Overview from './components/overview/Overview'
+import Header from './components/header/Header'
 
 const { LOGIN, SIGNIN } = cmpType
 
@@ -55,7 +56,10 @@ function App() {
       ) : CurrentComponent === SIGNIN ? (
         <SignUp />
       ) : (
-        <Overview />
+        <div >
+          <Header />
+          <Overview />
+        </div>
       )}
     </div>
   );

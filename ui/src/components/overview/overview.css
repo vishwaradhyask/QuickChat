@@ -1,0 +1,44 @@
+.overview-body {
+    height: calc(100vh - 64px);
+    display: flex;
+}
+
+.left-panel {
+    min-width: 200px;
+    width: 30%;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 30px 60px -12px inset, rgba(0, 0, 0, 0.3) 0px 18px 36px -18px inset;
+    height: inherit;
+}
+
+.left-side {
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    border-bottom-style: ridge;
+    margin-top: 5px;
+    padding: 5px;
+}
+
+.chat-body {
+    width: 70%;
+    margin-top: 5px;
+    padding: 5px;
+}
+
+.chat-haed {
+    display: flex;
+    margin: 0px 0px 0px 10px;
+    border-bottom-style: ridge;
+    padding: 5px;
+}
+
+.chat-bottom {
+    align-items: end;
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+}
+
+.chat-content {
+    height: calc(100vh - 265px);
+}
