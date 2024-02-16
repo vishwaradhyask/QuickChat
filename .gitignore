@@ -3,3 +3,5 @@ ui/node_modules/*
 backend/static/*
 backend/templates/*
 env/*
+backend/backend/__pycache__/*
+backend/main_app/__pycache__/*
