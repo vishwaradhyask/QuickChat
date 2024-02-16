@@ -20,7 +20,6 @@ const { LOGIN, SIGNIN } = cmpType
 function App() {
   const CurrentComponent = useSelector((state) => state.main.component)
   const snackBar = useSelector((state) => state.main.snackBarData)
-  console.log('state:', snackBar)
   const dispatch = useDispatch()
   const handleClosesnackBar = () => {
     dispatch(snackBarAction({ open: false, message: '' }))

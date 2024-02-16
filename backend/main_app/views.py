@@ -4,6 +4,9 @@ from rest_framework.views import APIView
 from rest_framework.mixins import CreateModelMixin
 from rest_framework.response import Response
 from .serializers.auth_user_serializers import Auth_user_serializers
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser, IsAuthenticatedOrReadOnly, DjangoModelPermissions, DjangoModelPermissionsOrAnonReadOnly
+from .models import Users
 import uuid
 # Create your views here.
 
@@ -54,3 +57,21 @@ class Health_check(APIView):
             "message": "Alive",
         }
         return Response(resp_body, status=200, template_name=None, headers=None, content_type=None)    
+    
+class UsersView(APIView):
+    serializer_class = Users
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        param = request.GET.get('param', None)
+        req_user = request.user
+        print('param came is: ', param, req_user)
+        resp_body = {
+            'succes': True,
+            "message": "Alive",
+        }
+        if(param and param == 'current'):
+            resp_body['body'] = Users.objects.filter(email=req_user).values()[0]
+        else:
+            resp_body['body'] = Users.objects.all().values()
+        return Response(resp_body, status=200, template_name=None, headers=None, content_type=None)

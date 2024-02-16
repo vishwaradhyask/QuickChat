@@ -27,9 +27,7 @@ export default function SignInSide() {
   const dispatch = useDispatch()
 
   React.useEffect(() => {
-    console.log('calles once')
     axios.get('api/health_check/').then((resp) => {
-      console.log('resposbes:', resp)
     }).catch((e) => {
       console.log(e)
     })
@@ -70,7 +68,6 @@ export default function SignInSide() {
       headers: {},
       data: payload
     }).then((res) => {
-      console.log(res)
       if (res.status === 200) {
         dispatch(snackBarAction({
           open: true,

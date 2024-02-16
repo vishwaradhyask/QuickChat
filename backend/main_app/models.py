@@ -21,3 +21,32 @@ class Users(AbstractBaseUser):
     
     class Meta:
         db_table: "users"
+
+class chatTable(models.Model):
+    id  = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    sender = models.ForeignKey(
+        'Users',
+        on_delete = models.CASCADE,
+        related_name='creator'
+    )
+    reciever = models.ForeignKey(
+        'Users',
+        on_delete = models.CASCADE,
+        related_name='assignee'
+    )
+    datetime = models.DateTimeField(auto_now=True)
+    content = models.TextField()
+
+class Connections(models.Model):
+    id = models.UUIDField(primary_key = True, default=uuid.uuid4, editable=False)
+    started_by = models.ForeignKey(
+        'Users',
+        on_delete = models.CASCADE,
+        related_name='starter'
+    )
+    other_end_user = models.ForeignKey(
+        'Users',
+        on_delete = models.CASCADE,
+        related_name='accepter'
+    )
+    datetime = models.DateTimeField(auto_now=True)

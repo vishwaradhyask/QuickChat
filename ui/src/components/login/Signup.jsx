@@ -84,7 +84,6 @@ export default function SignUp() {
       headers: {},
       data: payload
     }).then((res) => {
-      console.log(res)
       if (res.status === 200 && res.data.succes) {
         dispatch(snackBarAction({
           open: true,

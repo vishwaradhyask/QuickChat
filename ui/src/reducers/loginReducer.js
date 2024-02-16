@@ -6,7 +6,8 @@ const initialState = {
     open: false,
     message: ""
   },
-  loginCredentials: {}
+  loginCredentials: {},
+  profileData: {}
 }
 
 export const counterSlice = createSlice({
@@ -22,11 +23,14 @@ export const counterSlice = createSlice({
     setLoginCredentials: (state, actions) => {
       state.loginCredentials = actions.payload
     },
+    setProfiledata: (state, actions) => {
+      state.profileData = actions.payload
+    },
 
   },
 })
 
 // Action creators are generated for each case reducer function
-export const { setComponent, snackBarAction, setLoginCredentials } = counterSlice.actions
+export const { setComponent, snackBarAction, setLoginCredentials, setProfiledata } = counterSlice.actions
 
 export default counterSlice.reducer
