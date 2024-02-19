@@ -1,150 +1,227 @@
 import * as React from 'react';
+import Accordion from '@mui/material/Accordion';
+import AccordionActions from '@mui/material/AccordionActions';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
-import Autocomplete from '@mui/material/Autocomplete';
-import CircularProgress from '@mui/material/CircularProgress';
+import Box from '@mui/material/Box';
+import Switch from '@mui/material/Switch';
 import axios from 'axios';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from "react-redux"
+import { setProfiledata } from '../../reducers/loginReducer';
 
-function sleep(duration) {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve();
-    }, duration);
-  });
-}
 
-export default function Asynchronous({getSelectedUserForChat}) {
-  const [open, setOpen] = React.useState(false);
-  const [options, setOptions] = React.useState([]);
-  const loading = open && options.length === 0;
+export default function AccordionUsage({propData, index}) {
+  const label = { inputProps: { 'aria-label': 'Switch demo' } };
+  const [data, setData] = React.useState({})
   const access = useSelector((state) => state.main.loginCredentials.access)
+  const dispatch = useDispatch()
 
+  // console.log(' data: ', data)
   React.useEffect(() => {
-    let active = true;
+    setData(propData)
+  }, [])
 
-    if (!loading) {
-      return undefined;
+  const handleChangeInValue= (e, type, index) => {
+    console.log(e.target.value, type, index)
+    let value = e.target.value
+    let tmpdata =structuredClone(data);
+    if(type === "dbp-bp"){
+      tmpdata.distance_base_price[index].price = value
+    }else if(type === "dbp-wd"){
+      tmpdata.distance_base_price[index].week_days = value
+    }else if(type === "dbp-km"){
+      tmpdata.distance_base_price[index].up_to = value
+    }else if(type === "dap"){
+      tmpdata.distance_additional_price = value
+    }else if(type === "tmf"){
+      tmpdata.multiple_factor_time = value
+    }else if(type === "wc"){
+      tmpdata.waiting_price = value
+    }else if(type === "sw"){
+      console.log('e.', e.target.checked)
+      tmpdata.default = e.target.checked
     }
+    setData(tmpdata)
+  }
 
-    (async () => {
-      await axios
-        .get("api/users/",{
-          headers:{
-            "Authorization" : `Bearer ${access}`
-          }
-        })
-        .then((res) => {
-          if (res.status === 200 && res.data.message === "Alive") {
-            if (active) {
-              setOptions([...res.data.body]);
-            }
-          }
-        })
-        .catch((e) => {
-          setOptions([]);
-          console.log("errror: ", e);
-        });
+  const handleAddBase = () => {
+    let tmpdata =structuredClone(data);
+    tmpdata.distance_base_price.push({
+      price: 0,
+      week_days: [],
+      up_to: 0,
+    },)
+    setData(tmpdata)
+  }
 
-    })();
+  const update = () => {
+    axios
+      .get("api/prices/", {
+        params: { param: "current" },
+        headers: {
+          Authorization: `Bearer ${access}`,
+        },
+      })
+      .then((res) => {
+        if (res.status === 200) {
+          console.log("got user data is: ", res);
+          dispatch(setProfiledata(res.data))
+        }
+      })
+      .catch((e) => {
+        console.log("errror: ", e);
+      });
+  }
 
-    return () => {
-      active = false;
-    };
-  }, [loading]);
-
-  React.useEffect(() => {
-    if (!open) {
-      setOptions([]);
+  const handleSave = () => {
+    console.log('save for code: ', data)
+    let meth = "post"
+    if(data.id == ""){
+      meth = "post"
+    }else{
+      meth = "put"
     }
-  }, [open]);
+    axios({
+      method: meth,
+      url: "api/prices/",
+      headers: { Authorization: `Bearer ${access}` },
+      data: data,
+      params:{id: data.id}
+    })
+      .then((res) => {
+        if (res.status === 200) {
+          console.log("success");
+          update()
+        }
+      })
+      .catch((e) => {
+        console.log("error:", e);
+      });
+  }
 
   return (
-    <Autocomplete
-      id="asynchronous-demo"
-      sx={{ width: 300 }}
-      open={open}
-      onOpen={() => {
-        setOpen(true);
-      }}
-      onClose={() => {
-        setOpen(false);
-      }}
-      isOptionEqualToValue={(option, value) => option.id === value.id}
-      getOptionLabel={(option) => `${option.first_name} ${option.last_name}\n [${option.email}]`}
-      options={options}
-      loading={loading}
-      onChange={(e, user) => {
-        console.log("selected user is: ", user);
-        getSelectedUserForChat(user);
-      }}
-      renderInput={(params) => (
-        <TextField
-          {...params}
-          label="Users"
-          InputProps={{
-            ...params.InputProps,
-            endAdornment: (
-              <React.Fragment>
-                {loading ? (
-                  <CircularProgress color="inherit" size={20} />
-                ) : null}
-                {params.InputProps.endAdornment}
-              </React.Fragment>
-            ),
-          }}
-        />
-      )}
-    />
+    <div style={{ width: "100%" }}>
+      <Accordion sx={{ width: "100%" }}>
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls="panel1-content"
+          id="panel1-header"
+        >
+          <h3>Price config {index} </h3>
+        </AccordionSummary>
+        <AccordionDetails>
+          <Box>
+            <h4>
+              Distance Base Price{" "}
+              <Button
+                onClick={() => {
+                  handleAddBase();
+                }}
+              >
+                Add one more Base Value
+              </Button>
+            </h4>
+            {data.distance_base_price && data.distance_base_price.length > 0
+              ? data.distance_base_price.map((d, i) => (
+                  <Box sx={{ marginBottom: "10px" }}>
+                    <TextField
+                      onChange={(e) => {
+                        handleChangeInValue(e, "dbp-bp", i);
+                      }}
+                      required
+                      id="filled-required"
+                      label="Base price"
+                      value={d.price}
+                    />
+                    <TextField
+                      required
+                      id="filled-required"
+                      label="Week Days from 1 to 7"
+                      value={d.week_days}
+                      onChange={(e) => {
+                        handleChangeInValue(e, "dbp-wd", i);
+                      }}
+                    />
+                    <TextField
+                      required
+                      id="filled-required"
+                      label="Up To km"
+                      value={d.up_to}
+                      onChange={(e) => {
+                        handleChangeInValue(e, "dbp-km", i);
+                      }}
+                    />
+                  </Box>
+                ))
+              : null}
+          </Box>
+          <Box>
+            <h4>Distance Additional Price</h4>
+            <TextField
+              required
+              id="filled-required"
+              label="Price"
+              value={
+                data.distance_additional_price
+                  ? data.distance_additional_price
+                  : 0
+              }
+              onChange={(e) => {
+                handleChangeInValue(e, "dap");
+              }}
+            />
+          </Box>
+          <Box>
+            <h4>Time Multiplier Factor</h4>
+            <TextField
+              required
+              id="filled-required"
+              value={
+                data.multiple_factor_time ? data.multiple_factor_time : "1x"
+              }
+              label="Price"
+              onChange={(e) => {
+                handleChangeInValue(e, "tmf");
+              }}
+            />
+          </Box>
+          <Box>
+            <h4>Waiting Charges after 3 min</h4>
+            <TextField
+              required
+              id="filled-required"
+              label="Price"
+              value={data.waiting_price ? data.waiting_price : 0}
+              onChange={(e) => {
+                handleChangeInValue(e, "wc");
+              }}
+            />
+          </Box>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <h4>Use this Config</h4>
+            <Switch
+              {...label}
+              onChange={(e) => {
+                handleChangeInValue(e, "sw");
+              }}
+              checked={data.default}
+            />
+          </Box>
+        </AccordionDetails>
+        <AccordionActions>
+          <Button>Cancel</Button>
+          <Button onClick={() => handleSave()} >Save</Button>
+        </AccordionActions>
+      </Accordion>
+    </div>
   );
 }
-
-// Top films as rated by IMDb users. http://www.imdb.com/chart/top
-const topFilms = [
-  { title: "The Shawshank Redemption", year: 1994 },
-  { title: "The Godfather", year: 1972 },
-  { title: "The Godfather: Part II", year: 1974 },
-  { title: "The Dark Knight", year: 2008 },
-  { title: "12 Angry Men", year: 1957 },
-  { title: "Schindler's List", year: 1993 },
-  { title: "Pulp Fiction", year: 1994 },
-  {
-    title: "The Lord of the Rings: The Return of the King",
-    year: 2003,
-  },
-  { title: "The Good, the Bad and the Ugly", year: 1966 },
-  { title: "Fight Club", year: 1999 },
-  {
-    title: "The Lord of the Rings: The Fellowship of the Ring",
-    year: 2001,
-  },
-  {
-    title: "Star Wars: Episode V - The Empire Strikes Back",
-    year: 1980,
-  },
-  { title: "Forrest Gump", year: 1994 },
-  { title: "Inception", year: 2010 },
-  {
-    title: "The Lord of the Rings: The Two Towers",
-    year: 2002,
-  },
-  { title: "One Flew Over the Cuckoo's Nest", year: 1975 },
-  { title: "Goodfellas", year: 1990 },
-  { title: "The Matrix", year: 1999 },
-  { title: "Seven Samurai", year: 1954 },
-  {
-    title: "Star Wars: Episode IV - A New Hope",
-    year: 1977,
-  },
-  { title: "City of God", year: 2002 },
-  { title: "Se7en", year: 1995 },
-  { title: "The Silence of the Lambs", year: 1991 },
-  { title: "It's a Wonderful Life", year: 1946 },
-  { title: "Life Is Beautiful", year: 1997 },
-  { title: "The Usual Suspects", year: 1995 },
-  { title: "Léon: The Professional", year: 1994 },
-  { title: "Spirited Away", year: 2001 },
-  { title: "Saving Private Ryan", year: 1998 },
-  { title: "Once Upon a Time in the West", year: 1968 },
-  { title: "American History X", year: 1998 },
-  { title: "Interstellar", year: 2014 },
-];

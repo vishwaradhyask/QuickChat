@@ -16,7 +16,7 @@ import Editore from '../common/EditerRich'
 import Dailogeresponsive from '../common/Dailoge/Dailoge'
 import LoadUsers from './loadUsers'
 import { setProfiledata } from '../../reducers/loginReducer';
-
+import Pop from './Pop'
 import './overview.css'
 import axios from 'axios';
 
@@ -28,6 +28,7 @@ const Overview = () => {
   const [openAdduser, setOpenAddUser] = React.useState(false)
   const[newChat, setNewChat] = React.useState(null)
   const access = useSelector((state) => state.main.loginCredentials.access)
+  const configs = useSelector((state) => state.main.profileData)
   const dispatch = useDispatch()
 
   React.useEffect(() => {
@@ -37,16 +38,16 @@ const Overview = () => {
 
   const handlegetCurrentUserDetails = () => {
     axios
-      .get("api/users/", {
+      .get("api/prices/", {
         params: { param: "current" },
         headers: {
           Authorization: `Bearer ${access}`,
         },
       })
       .then((res) => {
-        if (res.status === 200 && res.data.message === "Alive") {
-          console.log("got user data is: ", res.data.body);
-          dispatch(setProfiledata(res.data.body))
+        if (res.status === 200) {
+          console.log("got user data is: ", res);
+          dispatch(setProfiledata(res.data))
         }
       })
       .catch((e) => {
@@ -63,98 +64,50 @@ const Overview = () => {
   console.log('status at overview openAdduser: ', openAdduser)
   console.log('status at overview newChat: ', newChat)
 
+  const handleAddConfig = () => {
+    let tmpdata = [...configs]
+    tmpdata.push({
+      id: "",
+      distance_base_price: [
+        {
+          price: 0,
+          week_days: [],
+          up_to: 0,
+        },
+      ],
+      distance_additional_price: 0,
+      updatedOn: "2024-02-19T09:28:03.952284Z",
+      waiting_price: 0,
+      multiple_factor_time: "1x",
+      default: false,
+      changed_by_id: "",
+    });
+    dispatch(setProfiledata(tmpdata))
+  }
+
   return (
     <div className="overview-body">
-      <Dailogeresponsive
-        title="Add New User"
-        handleClose={() => {
-          setOpenAddUser(false);
-        }}
-        open={openAdduser}
-        body={
-          <div>
-            <div style={{ margin: "10px" }}>
-              <LoadUsers 
-                getSelectedUserForChat={(user) => {setNewChat(user)}}
-              />
-            </div>
-          </div>
-        }
-        showCancelBtn={true}
-        handleOkClick={() => {
-          setOpenAddUser(false);
-        }}
-        okText={"Ok"}
-        cancelText={"Cancel"}
-      />
-      <div className="left-panel">
-        <div className="left-side">
-          {/* headr */}
-          <div>
-            <h3 style={{ margin: "unset" }}>Chats</h3>
-          </div>
-          <div>
-            <Button onClick={handleClickadd} variant="text">
-              {" "}
-              <AddCircleOutlineIcon />
-            </Button>
-          </div>
-        </div>
-        {/* body */}
-        <div>
-          <Stack direction="column" spacing={1}>
-            {chats.map((c) => {
-              return (
-                <Tooltip
-                  sx={{ display: "flex" }}
-                  title={`${c.name} [${c.email}]`}
-                >
-                  <Button
-                    onClick={() => {
-                      setCurrentChat(c);
-                    }}
-                    style={{ justifyContent: "start" }}
-                  >
-                    <Avatar
-                      sx={{ width: "32px", height: "32px", marginRight: "5px" }}
-                      alt={c.name}
-                      src="/static/images/avatar/1.jpg"
-                    />
-                    <Typography
-                      style={{
-                        fontSize: "12px",
-                        overflow: "hidden",
-                        whiteSpace: "nowrap",
-                        textOverflow: "ellipsis",
-                      }}
-                      variant="h6"
-                    >
-                      {c.name} [{c.email}]
-                    </Typography>
-                  </Button>
-                </Tooltip>
-              );
-            })}
-          </Stack>
-        </div>
-      </div>
-      <div className="chat-body">
-        <div className="chat-haed">
-          <Avatar
-            sx={{ width: "32px", height: "32px", marginRight: "5px" }}
-            alt={currentChat.name}
-            src="/static/images/avatar/1.jpg"
-          />
-          <Typography variant="h6">{currentChat.name}</Typography>
-        </div>
-        <div className="chat-content"></div>
-        <div className="chat-bottom">
-          <Editore style={{ width: "95%" }} />
-          <SendIcon style={{ margin: "10px" }} />
-        </div>
-      </div>
+      <Box style={{ width: "100%" }}>
+        <Box>
+          <Box>
+            <Button onClick={() => {handleAddConfig()}}>Add Config</Button>
+            <Pop />
+          </Box>
+        </Box>
+        <Box>
+          {configs && configs.length > 0 ? (
+            configs.map((c, i) => (
+              <LoadUsers key={c.id} propData={c} index={i} />
+            ))
+            ): null}
+        </Box>
+      </Box>
     </div>
   );
 }
+
+
+
+
 
 export default Overview

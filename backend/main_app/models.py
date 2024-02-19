@@ -22,31 +22,22 @@ class Users(AbstractBaseUser):
     class Meta:
         db_table: "users"
 
-class chatTable(models.Model):
-    id  = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    sender = models.ForeignKey(
+class Prices(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    distance_base_price = models.JSONField()
+    distance_additional_price = models.FloatField()
+    updatedOn = models.DateTimeField(auto_now=True)
+    waiting_price = models.FloatField()
+    multiple_factor_time=models.TextField()
+    default = models.BooleanField()
+    changed_by = models.ForeignKey(
         'Users',
         on_delete = models.CASCADE,
         related_name='creator'
     )
-    reciever = models.ForeignKey(
-        'Users',
-        on_delete = models.CASCADE,
-        related_name='assignee'
-    )
-    datetime = models.DateTimeField(auto_now=True)
-    content = models.TextField()
 
-class Connections(models.Model):
-    id = models.UUIDField(primary_key = True, default=uuid.uuid4, editable=False)
-    started_by = models.ForeignKey(
-        'Users',
-        on_delete = models.CASCADE,
-        related_name='starter'
-    )
-    other_end_user = models.ForeignKey(
-        'Users',
-        on_delete = models.CASCADE,
-        related_name='accepter'
-    )
-    datetime = models.DateTimeField(auto_now=True)
+    class Meta:
+        db_table = 'Prices'
+        managed = True
+        verbose_name = 'ModelName'
+        verbose_name_plural = 'ModelNames'
